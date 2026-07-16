@@ -13,3 +13,4 @@ RUN dotnet publish "TodoApi.csproj" -c Release -o /app/publish
 FROM base AS final
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TodoApi.dll"]
+# rebuild marker: validate argocd image-updater git write-back
