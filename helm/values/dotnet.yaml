@@ -1,6 +1,6 @@
 name: dotnet-todoapi
 image:
-  repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/challenge/dotnet-todoapi
+  repository: 749698443047.dkr.ecr.us-east-1.amazonaws.com/challenge/dotnet-todoapi
   tag: 38fd8c4
 containerPort: 80
 service:
