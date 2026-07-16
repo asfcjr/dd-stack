@@ -1,0 +1,9 @@
+---
+apiVersion: gateway.k8s.aws/v1beta1
+kind: LoadBalancerConfiguration
+metadata:
+  name: public-lb-config
+  namespace: kube-system
+spec:
+  scheme: internet-facing
+  ipAddressType: ipv4
