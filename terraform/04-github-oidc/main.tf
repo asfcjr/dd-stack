@@ -29,7 +29,9 @@ resource "aws_iam_role" "gha_ecr" {
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
-        StringLike   = { "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*" }
+        # GitHub emits immutable-ID subjects (repo:owner@ownerId/repo@repoId:...) for this account,
+        # so match with wildcards instead of the plain owner/repo form.
+        StringLike = { "token.actions.githubusercontent.com:sub" = "repo:${split("/", var.github_repo)[0]}@*/${split("/", var.github_repo)[1]}@*:*" }
       }
     }]
   })
