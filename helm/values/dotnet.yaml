@@ -1,0 +1,17 @@
+name: dotnet-todoapi
+image:
+  repository: 749698443047.dkr.ecr.us-east-1.amazonaws.com/challenge/dotnet-todoapi
+  tag: 38fd8c4
+containerPort: 80
+service:
+  type: NodePort
+  port: 8081
+datadog:
+  env: challenge
+  service: dotnet-todoapi
+  version: "1.0"
+  lib: dotnet
+  libVersion: latest
+resources:
+  requests: { cpu: 100m, memory: 128Mi }
+  limits: { memory: 256Mi }

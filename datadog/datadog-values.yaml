@@ -1,0 +1,24 @@
+datadog:
+  site: datadoghq.com
+  apiKeyExistingSecret: datadog-keys
+  appKeyExistingSecret: datadog-keys
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+
+  apm:
+    portEnabled: true
+    socketEnabled: true
+
+  processAgent:
+    enabled: true
+
+  tags:
+    - "env:challenge"
+
+clusterAgent:
+  enabled: true
+  admissionController:
+    enabled: true
+    mutateUnlabelled: false

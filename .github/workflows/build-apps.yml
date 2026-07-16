@@ -1,0 +1,70 @@
+name: build-apps
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - ".github/workflows/build-apps.yml"
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { app: python, repo: challenge/python-flask, dir: apps/python }
+          - { app: java, repo: challenge/java-spring, dir: apps/java }
+          - { app: dotnet, repo: challenge/dotnet-todoapi, dir: apps/dotnet }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login no ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build + push
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_SHA::7}"
+          aws ecr describe-repositories --repository-names "${{ matrix.repo }}" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "${{ matrix.repo }}" >/dev/null
+          docker build --platform linux/amd64 -t "$REGISTRY/${{ matrix.repo }}:$TAG" "${{ matrix.dir }}"
+          docker push "$REGISTRY/${{ matrix.repo }}:$TAG"
+
+  bump:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - name: Bump image.tag nos values + commit (GitOps)
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_SHA::7}"
+          sed -i "s|^\([[:space:]]*tag:\).*|\1 $TAG|" \
+            helm/values/python.yaml helm/values/java.yaml helm/values/dotnet.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: bump image tags para $TAG [skip ci]" || { echo "sem mudanças"; exit 0; }
+          git push origin HEAD:${{ github.ref_name }}
