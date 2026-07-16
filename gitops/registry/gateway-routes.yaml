@@ -10,7 +10,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/REPLACE_ME/challenge.git
+    repoURL: https://github.com/asfcjr/dd-stack.git
     targetRevision: main
     path: gitops/gateway-routes
     directory:
