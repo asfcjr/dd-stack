@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+        tags.datadoghq.com/env: {{ .Values.datadog.env | quote }}
+        tags.datadoghq.com/service: {{ .Values.datadog.service | quote }}
+        tags.datadoghq.com/version: {{ .Values.datadog.version | quote }}
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/{{ .Values.datadog.lib }}-lib.version: {{ .Values.datadog.libVersion | quote }}
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.name }}
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.name }}
+      containers:
+        - name: {{ .Values.name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          env:
+            - name: DD_ENV
+              value: {{ .Values.datadog.env | quote }}
+            - name: DD_SERVICE
+              value: {{ .Values.datadog.service | quote }}
+            - name: DD_VERSION
+              value: {{ .Values.datadog.version | quote }}
+            - name: DD_LOGS_INJECTION
+              value: "true"
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

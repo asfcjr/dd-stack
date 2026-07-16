@@ -1,0 +1,33 @@
+name: app
+namespace: apps
+replicas: 2
+pdb:
+  enabled: true
+  minAvailable: 1
+
+image:
+  repository: REPLACE_ME
+  tag: latest
+  pullPolicy: IfNotPresent
+
+containerPort: 8080
+
+service:
+  type: LoadBalancer
+  port: 80
+
+datadog:
+  env: challenge
+  service: app
+  version: "1.0"
+  lib: python
+  libVersion: latest
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+extraEnv: []
