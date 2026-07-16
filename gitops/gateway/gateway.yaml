@@ -18,3 +18,10 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.asfcjr.click"
+      allowedRoutes:
+        namespaces:
+          from: All

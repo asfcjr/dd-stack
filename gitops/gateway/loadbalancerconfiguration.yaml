@@ -7,3 +7,6 @@ metadata:
 spec:
   scheme: internet-facing
   ipAddressType: ipv4
+  listenerConfigurations:
+    - protocolPort: HTTPS:443
+      defaultCertificate: arn:aws:acm:us-east-1:749698443047:certificate/50a141cf-c997-422b-84f1-18297fd714e9
