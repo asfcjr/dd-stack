@@ -1,0 +1,15 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: python-flask
+  namespace: argocd
+spec:
+  writeBackConfig:
+    method: "git:secret:argocd/image-updater-git-creds"
+    gitConfig:
+      repository: "https://github.com/asfcjr/dd-stack.git"
+      branch: "main"
+      writeBackTarget: "helmvalues:../values/python.yaml"
+  applicationRefs:
+    - namePattern: "python-flask"
+      useAnnotations: true
