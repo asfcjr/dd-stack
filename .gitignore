@@ -1,0 +1,14 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars.local
+crash.log
+# App source clonado
+apps/datadogpoweruser/
+# Datadog / secrets
+*-secret.yaml
+.env
+.terraform/
+.terraform.lock.hcl
+*.tfstate*
