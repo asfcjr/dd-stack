@@ -26,7 +26,10 @@ cat <<'EOF'
 
 Pronto. Acesse a UI:
   kubectl -n argocd port-forward svc/argocd-server 8080:443
-  https://localhost:8080  (user: admin)
+  http://localhost:8080  (user: admin)
+  # server.insecure=true acima faz o argocd-server falar HTTP puro na porta 8080
+  # do pod (mesmo com o Service expondo 443/https) -- use http://, não https://,
+  # senão o TLS handshake é resetado pelo servidor ("connection reset by peer").
 
 Acompanhe os apps sincronizando:
   kubectl -n argocd get applications
