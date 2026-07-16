@@ -4,12 +4,9 @@ metadata:
   name: dotnet-todoapi
   namespace: argocd
 spec:
-  writeBackConfig:
-    method: "git:secret:argocd/image-updater-git-creds"
-    gitConfig:
-      repository: "https://github.com/asfcjr/dd-stack.git"
-      branch: "main"
-      writeBackTarget: "helmvalues:../values/dotnet.yaml"
+  # image + write-back config comes from the argocd-image-updater.argoproj.io/*
+  # annotations on the dotnet-todoapi Application (gitops/registry/app-dotnet.yaml),
+  # since useAnnotations makes the CR ignore writeBackConfig/images here.
   applicationRefs:
     - namePattern: "dotnet-todoapi"
       useAnnotations: true

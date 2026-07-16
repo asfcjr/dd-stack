@@ -4,12 +4,9 @@ metadata:
   name: python-flask
   namespace: argocd
 spec:
-  writeBackConfig:
-    method: "git:secret:argocd/image-updater-git-creds"
-    gitConfig:
-      repository: "https://github.com/asfcjr/dd-stack.git"
-      branch: "main"
-      writeBackTarget: "helmvalues:../values/python.yaml"
+  # image + write-back config comes from the argocd-image-updater.argoproj.io/*
+  # annotations on the python-flask Application (gitops/registry/app-python.yaml),
+  # since useAnnotations makes the CR ignore writeBackConfig/images here.
   applicationRefs:
     - namePattern: "python-flask"
       useAnnotations: true
