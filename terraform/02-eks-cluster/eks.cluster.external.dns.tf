@@ -18,6 +18,13 @@ resource "helm_release" "external_dns" {
     }
   ]
 
+  set_list = [
+    {
+      name  = "sources"
+      value = ["service", "ingress", "gateway-httproute"]
+    }
+  ]
+
   depends_on = [
     aws_iam_role_policy_attachment.external_dns,
     aws_eks_node_group.this,
