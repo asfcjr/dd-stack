@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apache
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: registry-1.docker.io/bitnamicharts
+    chart: apache
+    targetRevision: 11.3.2
+    helm:
+      releaseName: apache
+      valuesObject:
+        global:
+          security:
+            allowInsecureImages: true
+        image:
+          repository: bitnamilegacy/apache
+        replicaCount: 2
+        pdb:
+          create: true
+          minAvailable: 1
+        vhostsConfigConfigMap: apache-status-vhost
+        extraDeploy:
+          - |
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: apache-status-vhost
+              namespace: middleware
+            data:
+              status.conf: |
+                ExtendedStatus On
+                <Location /server-status>
+                  SetHandler server-status
+                </Location>
+        podAnnotations:
+          ad.datadoghq.com/apache.checks: |
+            {"apache":{"instances":[{"apache_status_url":"http://%%host%%/server-status?auto"}]}}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: middleware
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
