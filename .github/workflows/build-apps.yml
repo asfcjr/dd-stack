@@ -48,23 +48,3 @@ jobs:
             || aws ecr create-repository --repository-name "${{ matrix.repo }}" >/dev/null
           docker build --platform linux/amd64 -t "$REGISTRY/${{ matrix.repo }}:$TAG" "${{ matrix.dir }}"
           docker push "$REGISTRY/${{ matrix.repo }}:$TAG"
-
-  bump:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-      - name: Bump image.tag nos values + commit (GitOps)
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_SHA::7}"
-          sed -i "s|^\([[:space:]]*tag:\).*|\1 $TAG|" \
-            helm/values/python.yaml helm/values/java.yaml helm/values/dotnet.yaml
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore: bump image tags para $TAG [skip ci]" || { echo "sem mudanças"; exit 0; }
-          git push origin HEAD:${{ github.ref_name }}

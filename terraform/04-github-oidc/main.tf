@@ -1,10 +1,3 @@
-terraform {
-  required_version = ">= 1.5"
-  required_providers {
-    aws = { source = "hashicorp/aws", version = "~> 5.0" }
-  }
-}
-
 provider "aws" {
   region = var.region
   default_tags { tags = { Project = "challenge", ManagedBy = "Terraform" } }
@@ -17,7 +10,7 @@ variable "region" {
 variable "github_repo" {
   description = "OWNER/REPO do repositorio no GitHub"
   type        = string
-  default     = "REPLACE_ME/challenge"
+  default     = "asfcjr/dd-stack"
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
