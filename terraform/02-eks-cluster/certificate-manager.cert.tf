@@ -1,6 +1,7 @@
 resource "aws_acm_certificate" "this" {
-  domain_name       = var.custom_domain
-  validation_method = "DNS"
+  domain_name               = var.custom_domain
+  subject_alternative_names = ["*.${var.custom_domain}"]
+  validation_method         = "DNS"
 }
 
 resource "aws_route53_record" "certificate" {
