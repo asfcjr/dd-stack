@@ -1,7 +1,7 @@
 name: java-spring
 image:
   repository: 749698443047.dkr.ecr.us-east-1.amazonaws.com/challenge/java-spring
-  tag: 38fd8c4
+  tag: a8bb03e
 containerPort: 8080
 service:
   type: NodePort
@@ -13,5 +13,5 @@ datadog:
   lib: java
   libVersion: latest
 resources:
-  requests: { cpu: 250m, memory: 384Mi }
-  limits: { memory: 768Mi }
+  requests: {cpu: 250m, memory: 384Mi}
+  limits: {memory: 768Mi}
