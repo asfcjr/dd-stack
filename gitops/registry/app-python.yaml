@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
     argocd-image-updater.argoproj.io/image-list: python=749698443047.dkr.ecr.us-east-1.amazonaws.com/challenge/python-flask
-    argocd-image-updater.argoproj.io/python.update-strategy: latest
+    argocd-image-updater.argoproj.io/python.update-strategy: newest-build
     argocd-image-updater.argoproj.io/python.allow-tags: regexp:^[0-9a-f]{7}$
     argocd-image-updater.argoproj.io/python.helm.image-name: image.repository
     argocd-image-updater.argoproj.io/python.helm.image-tag: image.tag

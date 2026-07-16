@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
     argocd-image-updater.argoproj.io/image-list: dotnet=749698443047.dkr.ecr.us-east-1.amazonaws.com/challenge/dotnet-todoapi
-    argocd-image-updater.argoproj.io/dotnet.update-strategy: latest
+    argocd-image-updater.argoproj.io/dotnet.update-strategy: newest-build
     argocd-image-updater.argoproj.io/dotnet.allow-tags: regexp:^[0-9a-f]{7}$
     argocd-image-updater.argoproj.io/dotnet.helm.image-name: image.repository
     argocd-image-updater.argoproj.io/dotnet.helm.image-tag: image.tag

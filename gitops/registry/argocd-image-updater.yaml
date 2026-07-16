@@ -19,6 +19,9 @@ spec:
         serviceAccount:
           annotations:
             eks.amazonaws.com/role-arn: arn:aws:iam::749698443047:role/challenge-argocd-image-updater
+        extraEnv:
+          - name: HOME
+            value: /tmp
         authScripts:
           enabled: true
           scripts:
