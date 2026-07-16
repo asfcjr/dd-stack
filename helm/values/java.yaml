@@ -1,6 +1,6 @@
 name: java-spring
 image:
-  repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/challenge/java-spring
+  repository: 749698443047.dkr.ecr.us-east-1.amazonaws.com/challenge/java-spring
   tag: 38fd8c4
 containerPort: 8080
 service:
