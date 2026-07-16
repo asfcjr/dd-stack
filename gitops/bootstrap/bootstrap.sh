@@ -12,6 +12,7 @@ helm upgrade --install argocd argo/argo-cd \
   --namespace argocd --create-namespace \
   --version "${CHART_VERSION}" \
   --set configs.params."server\.insecure"=true \
+  --set server.service.type=NodePort \
   --wait
 
 echo ">> [2/3] Aplicando o app-of-apps (root-app)"

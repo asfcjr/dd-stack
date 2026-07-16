@@ -31,6 +31,8 @@ spec:
           minAvailable: 2
         clustering:
           forceBoot: true
+        service:
+          type: NodePort
         metrics:
           enabled: true
         podAnnotations:
