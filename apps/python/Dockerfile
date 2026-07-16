@@ -7,3 +7,4 @@ COPY ./src .
 
 
 CMD [ "python", "./app.py" ]
+# rebuild marker: validate argocd image-updater git write-back

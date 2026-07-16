@@ -9,3 +9,5 @@ COPY --from=build /app/target/spring-java-0.0.1-SNAPSHOT.jar spring-java.jar
 
 
 ENTRYPOINT ["java","-jar","./spring-java.jar"]
+
+# rebuild marker: validate argocd image-updater git write-back
