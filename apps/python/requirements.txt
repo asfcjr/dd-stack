@@ -1,5 +1,9 @@
 Flask>=2.0.0
 requests
 JSON-log-formatter
-ddtrace
 datadog
+# NOTE: ddtrace is intentionally NOT pinned here. The Datadog admission
+# controller injects the tracer at runtime; pip-installing it too creates a
+# second tracer instance, so manual spans and log correlation would attach to
+# a tracer with no active request span. Relying only on the injected library
+# keeps a single unified tracer (distributed traces + working log correlation).
