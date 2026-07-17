@@ -41,7 +41,7 @@ spec:
                 </Location>
         podAnnotations:
           ad.datadoghq.com/apache.checks: |
-            {"apache":{"instances":[{"apache_status_url":"http://%%host%%/server-status?auto"}]}}
+            {"apache":{"instances":[{"apache_status_url":"http://%%host%%:8080/server-status?auto"}]}}
   destination:
     server: https://kubernetes.default.svc
     namespace: middleware
