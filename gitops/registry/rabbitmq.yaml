@@ -37,7 +37,7 @@ spec:
           enabled: true
         podAnnotations:
           ad.datadoghq.com/rabbitmq.checks: |
-            {"rabbitmq":{"instances":[{"prometheus_plugin":{"url":"http://%%host%%:15692"}}]}}
+            {"rabbitmq":{"instances":[{"prometheus_plugin":{"url":"http://%%host%%:9419"}}]}}
   destination:
     server: https://kubernetes.default.svc
     namespace: middleware

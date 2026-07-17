@@ -7,7 +7,7 @@ podAnnotations:
           {
             "openmetrics_endpoint": "http://%%host%%:8080/metrics",
             "namespace": "karpenter",
-            "metrics": [".*"]
+            "metrics": ["karpenter_.*"]
           }
         ]
       }
