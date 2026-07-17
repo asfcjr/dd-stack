@@ -1,13 +1,11 @@
 podAnnotations:
   ad.datadoghq.com/controller.checks: |
     {
-      "openmetrics": {
+      "karpenter": {
         "init_config": {},
         "instances": [
           {
-            "openmetrics_endpoint": "http://%%host%%:8080/metrics",
-            "namespace": "karpenter",
-            "metrics": ["karpenter_.*"]
+            "openmetrics_endpoint": "http://%%host%%:8080/metrics"
           }
         ]
       }
