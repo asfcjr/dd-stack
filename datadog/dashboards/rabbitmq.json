@@ -1,0 +1,321 @@
+{
+  "title": "RabbitMQ",
+  "description": null,
+  "layout_type": "free",
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "default": "challenge"
+    }
+  ],
+  "widgets": [
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "QUEUE DEPTH (READY)",
+        "requests": [
+          {
+            "q": "sum:rabbitmq.queue.messages.ready{$env}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 1000,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 100,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 100,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 5396718008319647
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "UNACKED MESSAGES",
+        "requests": [
+          {
+            "q": "sum:rabbitmq.queue.messages.unacked{$env}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 500,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 50,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 50,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 36,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 2651184901025598
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "MEMORY WATERMARK",
+        "requests": [
+          {
+            "q": "max:rabbitmq.alarms.memory_used_watermark{$env}",
+            "aggregator": "max",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<=",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 0,
+        "timeseries_background": {
+          "type": "bars"
+        }
+      },
+      "layout": {
+        "x": 72,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 1852775701965723
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "DISK WATERMARK",
+        "requests": [
+          {
+            "q": "max:rabbitmq.alarms.free_disk_space.watermark{$env}",
+            "aggregator": "max",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": "<=",
+                "value": 0,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 0,
+        "timeseries_background": {
+          "type": "bars"
+        }
+      },
+      "layout": {
+        "x": 108,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 8680432394497003
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Mensagens em fila (ready + unacked)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "sum:rabbitmq.queue.messages.ready{$env}",
+            "display_type": "area",
+            "style": {
+              "palette": "purple"
+            }
+          },
+          {
+            "q": "sum:rabbitmq.queue.messages.unacked{$env}",
+            "display_type": "area",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 1000",
+            "display_type": "error dashed",
+            "label": "Critico 1000"
+          },
+          {
+            "value": "y = 100",
+            "display_type": "warning dashed",
+            "label": "Atencao 100"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 24,
+        "width": 68,
+        "height": 34
+      },
+      "id": 984825047359954
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Consumer utilisation (%)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "avg:rabbitmq.queue.consumer_utilisation{$env} by {queue}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 24,
+        "width": 68,
+        "height": 34
+      },
+      "id": 2480136762104825
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Publish rate por fila",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "sum:rabbitmq.queue.messages.published.count{$env} by {queue}.as_rate()",
+            "display_type": "bars",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 62,
+        "width": 68,
+        "height": 34
+      },
+      "id": 3387885390858204
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Auth attempts (ok vs failed)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "sum:rabbitmq.auth_attempts.succeeded.count{$env}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "sum:rabbitmq.auth_attempts.failed.count{$env}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "red_alert"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 62,
+        "width": 68,
+        "height": 34
+      },
+      "id": 7226971615340383
+    },
+    {
+      "definition": {
+        "type": "manage_status",
+        "title": "Monitors",
+        "query": "tag:(\"env:challenge\")",
+        "sort": "status,asc",
+        "count": 10,
+        "start": 0,
+        "display_format": "countsAndList"
+      },
+      "layout": {
+        "x": 0,
+        "y": 100,
+        "width": 140,
+        "height": 20
+      },
+      "id": 8467580216574063
+    }
+  ],
+  "notify_list": null,
+  "restricted_roles": []
+}

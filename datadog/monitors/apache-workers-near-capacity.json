@@ -1,0 +1,21 @@
+{
+  "name": "[Challenge] Apache workers near capacity",
+  "type": "query alert",
+  "query": "avg(last_5m):( avg:apache.performance.busy_workers{env:challenge} / avg:apache.performance.max_workers{env:challenge} ) * 100 > 80",
+  "message": "{{#is_alert}}Apache esta usando mais de 80% dos workers disponiveis - risco de saturacao.{{/is_alert}}\n@antoniosergiof@outlook.com\n@slack-alerts",
+  "tags": [
+    "env:challenge",
+    "service:apache"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 80.0
+    },
+    "notify_no_data": false,
+    "notify_audit": false,
+    "new_host_delay": 300,
+    "include_tags": true,
+    "silenced": {}
+  },
+  "priority": null
+}
