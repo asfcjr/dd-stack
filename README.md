@@ -44,7 +44,11 @@
 
 ## Arquitetura
 
-> O diagrama abaixo é a visão oficial; ele substitui qualquer imagem estática. Renderiza nativamente no GitHub.
+![Diagrama de fluxo da arquitetura](docs/architecture/fluxo.svg)
+
+<sub>Fonte editável em [`docs/architecture/fluxo.drawio`](docs/architecture/fluxo.drawio) (abra em [app.diagrams.net](https://app.diagrams.net)).</sub>
+
+> O diagrama abaixo é a visão oficial em Mermaid; ele substitui qualquer imagem estática caso fiquem fora de sincronia. Renderiza nativamente no GitHub.
 
 ```mermaid
 flowchart LR
