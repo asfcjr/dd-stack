@@ -116,8 +116,10 @@ dd-stack/
 ├── helm/                      # Chart genérico de app + values por app
 │   ├── app/                   # Deployment/Service/PDB com UST do Datadog
 │   └── values/                # python.yaml / java.yaml / dotnet.yaml
-├── datadog/                   # Values do Helm do Datadog Agent
-├── docs/architecture/         # Diagrama de fluxo (fonte .drawio)
+├── datadog/                   # Datadog gerenciado via Argo CD (gitops/registry/datadog.yaml)
+│   ├── dashboards/            # Snapshot JSON dos 4 dashboards (backup, não fonte de deploy)
+│   └── monitors/              # Snapshot JSON dos 7 monitors
+├── docs/architecture/         # Diagrama de arquitetura (fluxo.svg)
 └── .github/workflows/         # build-apps.yml (OIDC → ECR)
 ```
 
@@ -133,7 +135,7 @@ O `gitops/bootstrap` instala o Argo CD uma única vez, depois aplica uma `Applic
 
 | Wave | Componentes |
 |---|---|
-| **0** | External Secrets Operator, Argo CD Image Updater, CRDs da Gateway API |
+| **0** | External Secrets Operator, Argo CD Image Updater, CRDs da Gateway API, Datadog Agent |
 | **1** | Gateway + LoadBalancerConfiguration, config do ExternalSecret, config do Image Updater |
 | **2** | Apache, RabbitMQ, app python-flask |
 | **3** | HTTPRoutes |
@@ -152,7 +154,7 @@ Uma `GatewayClass` (`alb`, controller `gateway.k8s.aws/alb`) e um `Gateway` cham
 O ExternalDNS reconcilia esses hostnames no Route 53 automaticamente.
 
 ### Observabilidade (Datadog)
-O Datadog Agent + Cluster Agent são implantados com os agentes de **logs** (coleta tudo), **APM**, **process** e **cluster-checks**, o **orchestrator explorer**, e o **admission controller**. Como o chart genérico das apps já carimba o **Unified Service Tagging** (`env`/`service`/`version`) e as annotations `admission.datadoghq.com/*`, o Datadog **injeta a biblioteca de tracing automaticamente** por linguagem — sem mudar nada no código da aplicação. O serviço Python de referência adiciona logs JSON estruturados com **correlação de trace-id** e métricas de negócio customizadas (`orders.placed`, `orders.value_usd`) via DogStatsD. Checks de terceiros (Apache `server-status`, plugin Prometheus do RabbitMQ, `/metrics` do Karpenter) são conectados via annotations no pod.
+O Datadog Agent + Cluster Agent são **gerenciados pelo Argo CD** (`gitops/registry/datadog.yaml`, sync-wave 0) como qualquer outro componente da plataforma — nada de `helm install` manual fora do fluxo GitOps. São implantados com os agentes de **logs** (coleta tudo), **APM**, **process** e **cluster-checks**, o **orchestrator explorer**, e o **admission controller**. Como o chart genérico das apps já carimba o **Unified Service Tagging** (`env`/`service`/`version`) e as annotations `admission.datadoghq.com/*`, o Datadog **injeta a biblioteca de tracing automaticamente** por linguagem — sem mudar nada no código da aplicação. O serviço Python de referência adiciona logs JSON estruturados com **correlação de trace-id** e métricas de negócio customizadas (`orders.placed`, `orders.value_usd`) via DogStatsD. Checks de terceiros (Apache `server-status`, plugin Prometheus do RabbitMQ, `/metrics` do Karpenter) são conectados via annotations no pod. Dashboards e monitors são versionados como backup em `datadog/dashboards/` e `datadog/monitors/`.
 
 ### CI/CD
 O `build-apps.yml` dispara em pushes dentro de `apps/**`. Ele assume a role `challenge-gha-ecr` via **OIDC**, faz login no ECR, e builda os três serviços em uma matrix, taggeando cada imagem com o SHA de 7 caracteres do commit. O deploy é intencionalmente **fora** do CI — o Argo CD Image Updater é o dono da promoção.
@@ -188,15 +190,15 @@ cd ../04-github-oidc  && terraform init && terraform apply   # gera o output gha
 # 3) Aponta o kubectl pro cluster
 aws eks update-kubeconfig --name challenge-cluster --region us-east-1
 
-# 4) Bootstrap do control plane GitOps (instala o Argo CD + app raiz)
-./gitops/bootstrap/bootstrap.sh
+# 4) Secret da API key do Datadog (unico passo manual — nunca vai pro Git)
+kubectl create namespace datadog
+kubectl -n datadog create secret generic datadog-secret --from-literal api-key=<SUA_API_KEY>
 
-# 5) Observabilidade (Helm fora do GitOps; API key vem de um datadog-secret pré-criado)
-helm upgrade --install datadog datadog/datadog \
-  -n datadog --create-namespace -f datadog/datadog-values.yaml
+# 5) Bootstrap do control plane GitOps (instala o Argo CD + app raiz)
+./gitops/bootstrap/bootstrap.sh
 ```
 
-Configure o secret `AWS_ROLE_ARN` do CI com o output `gha_role_arn`. O Argo CD então converge o resto da plataforma automaticamente.
+Configure o secret `AWS_ROLE_ARN` do CI com o output `gha_role_arn`. O Argo CD então converge o resto da plataforma automaticamente — **inclusive o Datadog Agent**, que só precisa do `datadog-secret` já existir no namespace.
 
 ---
 
@@ -215,8 +217,7 @@ Configure o secret `AWS_ROLE_ARN` do CI com o output `gha_role_arn`. O Argo CD e
 Estado honesto da plataforma e próximas iterações:
 
 - **Implantar Java e .NET via GitOps** — ambos já são buildados e publicados hoje; falta adicionar as `Application`s do Argo CD, `HTTPRoute`s e a conexão com o Image Updater deles, seguindo a referência do Python.
-- **Monitors e SLOs como código** — os monitors, SLOs e o canal de notificação do **Slack** do Datadog estão hoje configurados na UI do Datadog; codificar isso (provider Datadog do Terraform) pra deixar o alerting versionado e reproduzível.
-- **Gerenciar o Datadog via GitOps** — o Agent é instalado fora do fluxo GitOps via Helm; incorporar ao app-of-apps pra ter uma única fonte da verdade.
+- **Monitors e SLOs como código** — os 7 monitors e os 4 dashboards estão versionados como snapshot em `datadog/monitors/` e `datadog/dashboards/`, mas ainda são criados/editados pela UI e a SLO nem existe como objeto formal; o próximo passo é o provider Datadog do Terraform pra isso virar `apply`, não backup manual.
 - **Subnets privadas de node + saída via NAT** — o cluster hoje roda em subnets públicas com NAT desabilitado pra minimizar custo do desafio; mover as workloads pra subnets privadas com NAT (ou VPC endpoints) pra uma postura de produção.
 - **Reabilitar os admission webhooks** — os releases Helm do LBC/ExternalDNS/Karpenter desabilitam webhooks pra simplificar a ordem do primeiro apply; reabilitar pra validação completa.
 
