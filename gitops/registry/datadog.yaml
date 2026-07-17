@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: datadog
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://helm.datadoghq.com
+    chart: datadog
+    targetRevision: 3.231.4
+    helm:
+      releaseName: datadog-agent
+      valuesObject:
+        registry: public.ecr.aws/datadog
+        datadog:
+          site: datadoghq.com
+          clusterName: challenge-cluster
+          apiKeyExistingSecret: datadog-secret
+          logs:
+            enabled: true
+            containerCollectAll: true
+          apm:
+            portEnabled: true
+            socketEnabled: true
+          processAgent:
+            enabled: true
+          clusterChecks:
+            enabled: true
+          orchestratorExplorer:
+            enabled: true
+          tags:
+            - "env:challenge"
+        clusterAgent:
+          enabled: true
+          admissionController:
+            enabled: true
+            mutateUnlabelled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: datadog
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
