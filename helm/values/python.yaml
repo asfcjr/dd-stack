@@ -1,7 +1,7 @@
 name: python-flask
 image:
   repository: 749698443047.dkr.ecr.us-east-1.amazonaws.com/challenge/python-flask
-  tag: a8bb03e
+  tag: e10b7e8
 containerPort: 5000
 service:
   type: NodePort
