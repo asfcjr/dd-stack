@@ -1,7 +1,7 @@
 datadog:
   site: datadoghq.com
-  apiKeyExistingSecret: datadog-keys
-  appKeyExistingSecret: datadog-keys
+  clusterName: challenge-cluster
+  apiKeyExistingSecret: datadog-secret
 
   logs:
     enabled: true
@@ -14,6 +14,12 @@ datadog:
   processAgent:
     enabled: true
 
+  clusterChecks:
+    enabled: true
+
+  orchestratorExplorer:
+    enabled: true
+
   tags:
     - "env:challenge"
 
@@ -22,3 +28,5 @@ clusterAgent:
   admissionController:
     enabled: true
     mutateUnlabelled: false
+
+registry: public.ecr.aws/datadog
