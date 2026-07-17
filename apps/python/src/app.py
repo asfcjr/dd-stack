@@ -53,9 +53,10 @@ class TraceContextFilter(logging.Filter):
 
     def filter(self, record):
         if _HAS_TRACE:
-            ctx = tracer.get_log_correlation_context()
-            for key in ("trace_id", "span_id", "service", "env", "version"):
-                setattr(record, "dd.{}".format(key), ctx.get(key, ""))
+            # ddtrace already returns dd.-prefixed keys (dd.trace_id, dd.span_id,
+            # dd.service, dd.env, dd.version); copy them straight onto the record.
+            for key, value in tracer.get_log_correlation_context().items():
+                setattr(record, key, value)
         return True
 
 
