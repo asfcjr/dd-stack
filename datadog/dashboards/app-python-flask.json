@@ -1,0 +1,718 @@
+{
+  "title": "App - Symbol Prices API (python-flask)",
+  "description": "APM full-stack: latencia/trafego lideram, RED por endpoint, dependencias (postgres/redis/market-data), negocio e logs correlacionados a traces. KPIs distribuidos por contexto.",
+  "layout_type": "free",
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "default": "challenge"
+    }
+  ],
+  "widgets": [
+    {
+      "definition": {
+        "type": "note",
+        "content": "**APM · LATENCIA & TRAFEGO**",
+        "background_color": "blue",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 142,
+        "height": 4
+      },
+      "id": 8305800372051181
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "ERROR RATE",
+        "custom_unit": "%",
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        },
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "(errors / hits) * 100",
+                "conditional_formats": [
+                  {
+                    "comparator": ">",
+                    "value": 5,
+                    "palette": "white_on_red"
+                  },
+                  {
+                    "comparator": ">",
+                    "value": 2,
+                    "palette": "white_on_yellow"
+                  },
+                  {
+                    "comparator": "<=",
+                    "value": 2,
+                    "palette": "white_on_green"
+                  }
+                ]
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "errors",
+                "query": "sum:trace.flask.request.errors{service:python-flask,$env}.as_count()"
+              },
+              {
+                "data_source": "metrics",
+                "name": "hits",
+                "query": "sum:trace.flask.request.hits{service:python-flask,$env}.as_count()"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 34,
+        "height": 28
+      },
+      "id": 2197110807651425
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Latencia p50 / p95 / p99",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "p50:trace.flask.request{service:python-flask,$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "q": "p95:trace.flask.request{service:python-flask,$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "warm"
+            }
+          },
+          {
+            "q": "p99:trace.flask.request{service:python-flask,$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "red_alert",
+              "line_width": "thick"
+            }
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 0.5",
+            "display_type": "error dashed",
+            "label": "SLA 500ms"
+          },
+          {
+            "value": "y = 0.2",
+            "display_type": "warning dashed",
+            "label": "Alerta 200ms"
+          }
+        ]
+      },
+      "layout": {
+        "x": 36,
+        "y": 5,
+        "width": 106,
+        "height": 28
+      },
+      "id": 4001157905464179
+    },
+    {
+      "definition": {
+        "type": "note",
+        "content": "**TRAFEGO & ENDPOINTS (RED)**   ·   rate / errors / duration por rota",
+        "background_color": "purple",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 35,
+        "width": 142,
+        "height": 4
+      },
+      "id": 8251629705228415
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Requisicoes por classe de status (2xx / 4xx / 5xx)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "sum:trace.flask.request.hits.by_http_status{service:python-flask,$env,http.status_code:2*}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "sum:trace.flask.request.hits.by_http_status{service:python-flask,$env,http.status_code:4*}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "warm"
+            }
+          },
+          {
+            "q": "sum:trace.flask.request.hits.by_http_status{service:python-flask,$env,http.status_code:5*}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "red_alert",
+              "line_width": "thick"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 40,
+        "width": 70,
+        "height": 30
+      },
+      "id": 7926951172689750
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Requisicoes por endpoint (req/s)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "sum:trace.flask.request.hits{service:python-flask,$env} by {resource_name}.as_rate()",
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 40,
+        "width": 70,
+        "height": 30
+      },
+      "id": 3021432299232539
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Latencia p95 por endpoint",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "p95:trace.flask.request{service:python-flask,$env} by {resource_name}",
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 72,
+        "width": 70,
+        "height": 30
+      },
+      "id": 8488198203338270
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Erros por endpoint",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "sum"
+        ],
+        "requests": [
+          {
+            "q": "sum:trace.flask.request.errors{service:python-flask,$env} by {resource_name}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "red_alert"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 72,
+        "width": 70,
+        "height": 30
+      },
+      "id": 6527588567377669
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "THROUGHPUT",
+        "custom_unit": "req/s",
+        "precision": 1,
+        "autoscale": true,
+        "timeseries_background": {
+          "type": "bars"
+        },
+        "requests": [
+          {
+            "q": "sum:trace.flask.request.hits{service:python-flask,$env}.as_rate()",
+            "aggregator": "avg"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 104,
+        "width": 34,
+        "height": 26
+      },
+      "id": 1394739174975834
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "P99 LATENCY",
+        "custom_unit": "ms",
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        },
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "p99 * 1000",
+                "conditional_formats": [
+                  {
+                    "comparator": ">=",
+                    "value": 500,
+                    "palette": "white_on_red"
+                  },
+                  {
+                    "comparator": ">=",
+                    "value": 200,
+                    "palette": "white_on_yellow"
+                  },
+                  {
+                    "comparator": "<",
+                    "value": 200,
+                    "palette": "white_on_green"
+                  }
+                ]
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "p99",
+                "query": "p99:trace.flask.request{service:python-flask,$env}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ]
+      },
+      "layout": {
+        "x": 36,
+        "y": 104,
+        "width": 34,
+        "height": 26
+      },
+      "id": 6840791919463951
+    },
+    {
+      "definition": {
+        "type": "toplist",
+        "title": "Top endpoints por latencia (p99)",
+        "requests": [
+          {
+            "q": "p99:trace.flask.request{service:python-flask,$env} by {resource_name}",
+            "response_format": "scalar",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 104,
+        "width": 34,
+        "height": 26
+      },
+      "id": 8399039409194148
+    },
+    {
+      "definition": {
+        "type": "toplist",
+        "title": "Top endpoints por volume",
+        "requests": [
+          {
+            "q": "sum:trace.flask.request.hits{service:python-flask,$env} by {resource_name}.as_count()",
+            "response_format": "scalar",
+            "style": {
+              "palette": "cool"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 108,
+        "y": 104,
+        "width": 34,
+        "height": 26
+      },
+      "id": 7181024586216919
+    },
+    {
+      "definition": {
+        "type": "note",
+        "content": "**DEPENDENCIAS**   ·   onde o tempo e gasto (service map: postgres / redis / market-data)",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 132,
+        "width": 142,
+        "height": 4
+      },
+      "id": 4297436316815699
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Latencia por dependencia",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "avg:trace.postgres.query{$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "warm",
+              "line_width": "thick"
+            }
+          },
+          {
+            "q": "avg:trace.redis.command{$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "q": "avg:trace.http.request{service:market-data-api,$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 137,
+        "width": 70,
+        "height": 30
+      },
+      "id": 2323189891094162
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Chamadas por dependencia (req/s)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "sum:trace.postgres.query.hits{$env}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "warm"
+            }
+          },
+          {
+            "q": "sum:trace.redis.command.hits{$env}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "q": "sum:trace.http.request.hits{service:market-data-api,$env}.as_rate()",
+            "display_type": "line",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 137,
+        "width": 70,
+        "height": 30
+      },
+      "id": 4879328922953101
+    },
+    {
+      "definition": {
+        "type": "note",
+        "content": "**BUSINESS**   ·   ordens (metricas custom via DogStatsD)",
+        "background_color": "green",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 169,
+        "width": 142,
+        "height": 4
+      },
+      "id": 5830868728418989
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "ORDERS/S",
+        "custom_unit": "ord/s",
+        "precision": 2,
+        "timeseries_background": {
+          "type": "bars"
+        },
+        "requests": [
+          {
+            "q": "sum:prices_api.orders.placed{$env}.as_rate()",
+            "aggregator": "avg"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 174,
+        "width": 34,
+        "height": 26
+      },
+      "id": 6015445745457440
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "ORDER VALUE p95",
+        "custom_unit": "USD",
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        },
+        "requests": [
+          {
+            "q": "avg:prices_api.orders.value_usd.95percentile{$env}",
+            "aggregator": "avg"
+          }
+        ]
+      },
+      "layout": {
+        "x": 36,
+        "y": 174,
+        "width": 34,
+        "height": 26
+      },
+      "id": 6019151249935706
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Valor das ordens (avg / p95)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "avg:prices_api.orders.value_usd.avg{$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "avg:prices_api.orders.value_usd.95percentile{$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 174,
+        "width": 70,
+        "height": 26
+      },
+      "id": 7379872514577645
+    },
+    {
+      "definition": {
+        "type": "note",
+        "content": "**ERROS & LOGS**   ·   logs correlacionados a traces (clicaveis)",
+        "background_color": "orange",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 202,
+        "width": 142,
+        "height": 4
+      },
+      "id": 3261494151453844
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Volume de logs por status",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "sum"
+        ],
+        "requests": [
+          {
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "logs",
+                "search": {
+                  "query": "service:python-flask"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "status",
+                    "limit": 5,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "compute": {
+                  "aggregation": "count"
+                }
+              }
+            ],
+            "style": {
+              "palette": "warm"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 207,
+        "width": 70,
+        "height": 32
+      },
+      "id": 6187553770621909
+    },
+    {
+      "definition": {
+        "type": "log_stream",
+        "title": "Logs de erro (clicaveis -> trace)",
+        "query": "service:python-flask status:(error OR warn)",
+        "columns": [
+          "status",
+          "@endpoint",
+          "@symbol"
+        ],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "expanded-md"
+      },
+      "layout": {
+        "x": 72,
+        "y": 207,
+        "width": 70,
+        "height": 32
+      },
+      "id": 783267452254913
+    },
+    {
+      "definition": {
+        "type": "manage_status",
+        "title": "Monitors - env:challenge",
+        "query": "tag:(\"env:challenge\")",
+        "sort": "status,asc",
+        "count": 10,
+        "start": 0,
+        "display_format": "countsAndList"
+      },
+      "layout": {
+        "x": 0,
+        "y": 241,
+        "width": 142,
+        "height": 18
+      },
+      "id": 46917122363077
+    }
+  ],
+  "notify_list": null,
+  "restricted_roles": []
+}

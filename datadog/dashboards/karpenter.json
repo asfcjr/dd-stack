@@ -1,0 +1,328 @@
+{
+  "title": "Karpenter",
+  "description": null,
+  "layout_type": "free",
+  "template_variables": null,
+  "widgets": [
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "CLUSTER STATE SYNCED",
+        "requests": [
+          {
+            "q": "avg:karpenter.cluster_state.synced{*}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 1,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 5432434841710287
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "NODES GERENCIADOS",
+        "requests": [
+          {
+            "q": "avg:karpenter.cluster_state.node_count{*}",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 0,
+        "timeseries_background": {
+          "type": "bars"
+        }
+      },
+      "layout": {
+        "x": 36,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 7308399056340587
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Cloud Provider Errors",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "sum",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "sum:karpenter.cloudprovider.errors.count{*} by {error}.as_count()",
+            "display_type": "bars",
+            "style": {
+              "palette": "red_alert"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 0,
+        "width": 68,
+        "height": 20
+      },
+      "id": 4305466201452585
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Node Lifecycle - Termination Duration (p50 / p99)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "avg:karpenter.nodes.termination.time_seconds.quantile{quantile:0.5}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "q": "avg:karpenter.nodes.termination.time_seconds.quantile{quantile:0.99}",
+            "display_type": "line",
+            "style": {
+              "palette": "red_alert",
+              "line_width": "thick"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 24,
+        "width": 68,
+        "height": 34
+      },
+      "id": 742779412514525
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Node Lifecycle - Pod Startup Duration (p50 / p99)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "avg:karpenter.pods.startup.time_seconds.quantile{quantile:0.5}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "q": "avg:karpenter.pods.startup.time_seconds.quantile{quantile:0.99}",
+            "display_type": "line",
+            "style": {
+              "palette": "red_alert",
+              "line_width": "thick"
+            }
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 60",
+            "display_type": "warning dashed",
+            "label": "Alerta 60s"
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 24,
+        "width": 68,
+        "height": 34
+      },
+      "id": 5918615290245601
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Scheduler - Queue Depth",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "avg:karpenter.provisioner.scheduling.queue_depth{*}",
+            "display_type": "area",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 62,
+        "width": 68,
+        "height": 34
+      },
+      "id": 2299551067676787
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Scheduler - Simulation Duration (p50 / p95 / p99)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "p50:karpenter.provisioner.scheduling.simulation.duration_seconds{*}",
+            "display_type": "line",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "q": "p95:karpenter.provisioner.scheduling.simulation.duration_seconds{*}",
+            "display_type": "line",
+            "style": {
+              "palette": "purple"
+            }
+          },
+          {
+            "q": "p99:karpenter.provisioner.scheduling.simulation.duration_seconds{*}",
+            "display_type": "line",
+            "style": {
+              "palette": "red_alert",
+              "line_width": "thick"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 62,
+        "width": 68,
+        "height": 34
+      },
+      "id": 1681744788062786
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Capacity - Nodepools uso vs limite",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "avg:karpenter.nodepool_usage{*} by {resource_type}",
+            "display_type": "bars",
+            "style": {
+              "palette": "purple"
+            }
+          },
+          {
+            "q": "avg:karpenter.nodepool_limit{*} by {resource_type}",
+            "display_type": "line",
+            "style": {
+              "palette": "red_alert"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 100,
+        "width": 68,
+        "height": 34
+      },
+      "id": 6460919545168134
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Consolidacao - nodes elegiveis e latencia de decisao (p95)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "avg:karpenter.disruption.eligible_nodes{*}",
+            "display_type": "bars",
+            "style": {
+              "palette": "green"
+            }
+          },
+          {
+            "q": "p95:karpenter.karpenter_voluntary_disruption_decision_evaluation_duration_seconds{*}",
+            "display_type": "line",
+            "style": {
+              "palette": "warm"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 100,
+        "width": 68,
+        "height": 34
+      },
+      "id": 1532927809927035
+    },
+    {
+      "definition": {
+        "type": "manage_status",
+        "title": "Monitors",
+        "query": "tag:(\"env:challenge\")",
+        "sort": "status,asc",
+        "count": 10,
+        "start": 0,
+        "display_format": "countsAndList"
+      },
+      "layout": {
+        "x": 0,
+        "y": 138,
+        "width": 140,
+        "height": 20
+      },
+      "id": 7457450490090645
+    }
+  ],
+  "notify_list": null,
+  "restricted_roles": []
+}

@@ -1,0 +1,339 @@
+{
+  "title": "Apache",
+  "description": null,
+  "layout_type": "free",
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "default": "challenge"
+    }
+  ],
+  "widgets": [
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "REQUESTS/S",
+        "requests": [
+          {
+            "q": "avg:apache.net.request_per_s{$env}",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 1,
+        "timeseries_background": {
+          "type": "bars"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 5882686940303752
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "WORKER SATURATION",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "(query1 / query2) * 100",
+                "conditional_formats": [
+                  {
+                    "comparator": ">=",
+                    "value": 85,
+                    "palette": "white_on_red"
+                  },
+                  {
+                    "comparator": ">=",
+                    "value": 60,
+                    "palette": "white_on_yellow"
+                  },
+                  {
+                    "comparator": "<",
+                    "value": 60,
+                    "palette": "white_on_green"
+                  }
+                ]
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:apache.performance.busy_workers{$env}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "avg:apache.performance.max_workers{$env}"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "precision": 1,
+        "custom_unit": "%",
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 36,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 1884543947297688
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "THROUGHPUT",
+        "requests": [
+          {
+            "q": "avg:apache.net.bytes_per_s{$env}",
+            "aggregator": "avg"
+          }
+        ],
+        "precision": 0,
+        "custom_unit": "B/s",
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 72,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 3055520233225808
+    },
+    {
+      "definition": {
+        "type": "query_value",
+        "title": "CPU LOAD",
+        "requests": [
+          {
+            "q": "avg:apache.performance.cpu_load{$env}",
+            "aggregator": "avg",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 80,
+                "palette": "white_on_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 50,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 50,
+                "palette": "white_on_green"
+              }
+            ]
+          }
+        ],
+        "precision": 1,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 108,
+        "y": 0,
+        "width": 32,
+        "height": 20
+      },
+      "id": 2318641537697357
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Requests/s",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "avg:apache.net.request_per_s{$env}",
+            "display_type": "bars",
+            "style": {
+              "palette": "purple"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 24,
+        "width": 68,
+        "height": 34
+      },
+      "id": 4619832284343174
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Worker saturation (%)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "(query1 / query2) * 100"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:apache.performance.busy_workers{$env}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "avg:apache.performance.max_workers{$env}"
+              }
+            ],
+            "response_format": "timeseries",
+            "display_type": "area",
+            "style": {
+              "palette": "orange"
+            }
+          }
+        ],
+        "markers": [
+          {
+            "value": "y = 85",
+            "display_type": "error dashed",
+            "label": "Critico 85%"
+          },
+          {
+            "value": "y = 60",
+            "display_type": "warning dashed",
+            "label": "Atencao 60%"
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 24,
+        "width": 68,
+        "height": 34
+      },
+      "id": 8895181976193124
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Scoreboard - distribuicao de workers",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max"
+        ],
+        "requests": [
+          {
+            "q": "avg:apache.scoreboard.sending_reply{$env}",
+            "display_type": "area",
+            "style": {
+              "palette": "cool"
+            }
+          },
+          {
+            "q": "avg:apache.scoreboard.reading_request{$env}",
+            "display_type": "area",
+            "style": {
+              "palette": "warm"
+            }
+          },
+          {
+            "q": "avg:apache.scoreboard.keepalive{$env}",
+            "display_type": "area",
+            "style": {
+              "palette": "purple"
+            }
+          },
+          {
+            "q": "avg:apache.scoreboard.waiting_for_connection{$env}",
+            "display_type": "area",
+            "style": {
+              "palette": "green"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 62,
+        "width": 68,
+        "height": 34
+      },
+      "id": 2562056211508000
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Throughput (bytes/s)",
+        "legend_layout": "vertical",
+        "legend_columns": [
+          "avg",
+          "max",
+          "value"
+        ],
+        "requests": [
+          {
+            "q": "avg:apache.net.bytes_per_s{$env}",
+            "display_type": "line",
+            "style": {
+              "palette": "blue"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 72,
+        "y": 62,
+        "width": 68,
+        "height": 34
+      },
+      "id": 5209814391223199
+    },
+    {
+      "definition": {
+        "type": "manage_status",
+        "title": "Monitors",
+        "query": "tag:(\"env:challenge\")",
+        "sort": "status,asc",
+        "count": 10,
+        "start": 0,
+        "display_format": "countsAndList"
+      },
+      "layout": {
+        "x": 0,
+        "y": 100,
+        "width": 140,
+        "height": 20
+      },
+      "id": 7032451569114957
+    }
+  ],
+  "notify_list": null,
+  "restricted_roles": []
+}

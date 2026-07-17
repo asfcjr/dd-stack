@@ -44,70 +44,7 @@
 
 ## Arquitetura
 
-![Diagrama de fluxo da arquitetura](docs/architecture/fluxo.svg)
-
-<sub>Fonte editável em [`docs/architecture/fluxo.drawio`](docs/architecture/fluxo.drawio) (abra em [app.diagrams.net](https://app.diagrams.net)).</sub>
-
-> O diagrama abaixo é a visão oficial em Mermaid; ele substitui qualquer imagem estática caso fiquem fora de sincronia. Renderiza nativamente no GitHub.
-
-```mermaid
-flowchart LR
-    user([Usuário final])
-    dev([SRE / Desenvolvedor])
-    gh[Repositório GitHub]
-    gha[GitHub Actions build-apps]
-    ddsaas[(Datadog SaaS)]
-    slack[Slack]
-
-    subgraph AWS["AWS - us-east-1"]
-        r53[Route 53]
-        acm[Certificado wildcard ACM]
-        ecr[(Amazon ECR)]
-        sm[(AWS Secrets Manager)]
-        oidc[(Provedores IAM / OIDC)]
-        alb["ALB - Gateway API via AWS LBC"]
-
-        subgraph EKS["EKS - challenge-cluster 1.33"]
-            gw["Gateway - GatewayClass alb"]
-            routes{{HTTPRoutes}}
-            pysvc[python-flask]
-            argosvc[argocd-server]
-            rmqsvc[rabbitmq-mgmt]
-            argo["Argo CD - app-of-apps"]
-            iu[Argo CD Image Updater]
-            eso[External Secrets Operator]
-            lbc[AWS LB Controller]
-            edns[ExternalDNS]
-            karp[Karpenter]
-            ms[Metrics Server]
-            ebs[EBS CSI]
-            dd["Datadog Agent + Cluster Agent"]
-        end
-    end
-
-    %% CI - build e publicação
-    dev --> gh --> gha
-    gha -->|OIDC AssumeRole| ecr
-    gha -->|push imagem| ecr
-
-    %% CD - loop GitOps
-    gh -->|sync| argo
-    ecr -.->|observa| iu
-    iu -.->|git write-back| gh
-    argo -->|implanta| lbc & edns & karp & eso & ms & ebs
-    argo -->|implanta| gw & routes & dd
-
-    %% Caminho da requisição
-    user -->|"*.asfcjr.click"| r53 --> alb --> gw --> routes
-    routes --> pysvc & argosvc & rmqsvc
-    acm -.->|TLS| alb
-    edns --> r53
-    eso --> sm
-
-    %% Confiança e observabilidade
-    oidc -.->|IRSA| lbc & karp & eso & edns & ebs & iu
-    dd --> ddsaas -.->|alertas| slack
-```
+![Arquitetura](docs/architecture/fluxo.svg)
 
 **Duas fronteiras de confiança independentes, ambas keyless:**
 

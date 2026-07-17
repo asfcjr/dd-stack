@@ -1,0 +1,21 @@
+{
+  "name": "[Challenge] python-flask error rate high",
+  "type": "query alert",
+  "query": "sum(last_10m):( sum:trace.flask.request.errors{service:python-flask,env:challenge}.as_count() / sum:trace.flask.request.hits{service:python-flask,env:challenge}.as_count() ) * 100 > 5",
+  "message": "{{#is_alert}}Taxa de erro do python-flask acima de 5% nos ultimos 10 minutos.{{/is_alert}}\n@antoniosergiof@outlook.com\n@slack-alerts",
+  "tags": [
+    "env:challenge",
+    "service:python-flask"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 5.0
+    },
+    "notify_no_data": false,
+    "notify_audit": false,
+    "new_host_delay": 300,
+    "include_tags": true,
+    "silenced": {}
+  },
+  "priority": null
+}
