@@ -45,11 +45,26 @@ app = Flask("python-flask")
 # Silence Flask's default access logger; we emit structured JSON ourselves.
 logging.getLogger("werkzeug").disabled = True
 
+
+class TraceContextFilter(logging.Filter):
+    """Inject dd.trace_id / dd.span_id into every record so Datadog can pivot
+    from a trace straight to its logs. Uses ddtrace's official correlation
+    helper, which formats the ids the way the Datadog log pipeline expects."""
+
+    def filter(self, record):
+        if _HAS_TRACE:
+            ctx = tracer.get_log_correlation_context()
+            for key in ("trace_id", "span_id", "service", "env", "version"):
+                setattr(record, "dd.{}".format(key), ctx.get(key, ""))
+        return True
+
+
 log = logging.getLogger("python-flask")
 log.setLevel(logging.INFO)
 _handler = logging.StreamHandler()
 _handler.setFormatter(json_log_formatter.VerboseJSONFormatter())
 log.addHandler(_handler)
+log.addFilter(TraceContextFilter())
 log.propagate = False
 
 
